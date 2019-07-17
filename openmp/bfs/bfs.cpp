@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
+//#include <math.h>
 #include <stdlib.h>
 #include <omp.h>
+#include <sys/time.h>
 //#define NUM_THREAD 4
 #define OPEN
-
 
 FILE *fp;
 
@@ -47,7 +47,10 @@ void BFSGraph( int argc, char** argv)
 	Usage(argc, argv);
 	exit(0);
 	}
-    
+
+    struct timeval t1, t2;
+    gettimeofday(&t1, NULL);
+
 	num_omp_threads = atoi(argv[1]);
 	input_f = argv[2];
 	
@@ -117,7 +120,10 @@ void BFSGraph( int argc, char** argv)
 #ifdef OPEN
         double start_time = omp_get_wtime();
 #ifdef OMP_OFFLOAD
+#ifndef OMP_OFFLOAD_NOREUSE
+        printf("reuseing\n");
 #pragma omp target data map(to: no_of_nodes, h_graph_mask[0:no_of_nodes], h_graph_nodes[0:no_of_nodes], h_graph_edges[0:edge_list_size], h_graph_visited[0:no_of_nodes], h_updating_graph_mask[0:no_of_nodes]) map(h_cost[0:no_of_nodes])
+#endif
         {
 #endif 
 #endif
@@ -128,8 +134,11 @@ void BFSGraph( int argc, char** argv)
             stop=false;
 
 #ifdef OPEN
-            //omp_set_num_threads(num_omp_threads);
+            omp_set_num_threads(num_omp_threads);
     #ifdef OMP_OFFLOAD
+    #ifdef OMP_OFFLOAD_NOREUSE
+    #pragma omp target data map(tofrom: no_of_nodes, h_graph_nodes[0:no_of_nodes], h_graph_edges[0:edge_list_size], h_graph_visited[0:no_of_nodes]) map(h_cost[0:no_of_nodes], h_updating_graph_mask[0:no_of_nodes], h_graph_mask[0:no_of_nodes])
+    #endif
     #pragma omp target
     #endif
     #pragma omp parallel for 
@@ -152,7 +161,10 @@ void BFSGraph( int argc, char** argv)
 
 #ifdef OPEN
     #ifdef OMP_OFFLOAD
-    #pragma omp target map(stop)
+    #ifdef OMP_OFFLOAD_NOREUSE
+    #pragma omp target data map(tofrom: no_of_nodes) map(h_updating_graph_mask[0:no_of_nodes], h_graph_mask[0:no_of_nodes], h_graph_visited[0:no_of_nodes],stop)
+    #endif
+    #pragma omp target
     #endif
     #pragma omp parallel for
 #endif
@@ -182,6 +194,12 @@ void BFSGraph( int argc, char** argv)
 	fclose(fpo);
 	printf("Result stored in result.txt\n");
 
+
+    gettimeofday(&t2, NULL);
+    double runtime = (t2.tv_sec - t1.tv_sec);
+    runtime += (t2.tv_usec - t1.tv_usec) / 1000000.0;
+
+    printf("Total Runtime - %.3f\n", runtime);
 
 	// cleanup memory
 	free( h_graph_nodes);
