@@ -9,20 +9,20 @@ DEBUG          := NO
 PROFILE        := NO
 
 # ------------  name of the executable  ----------------------------------------
-EXECUTABLE      := lud_omp_offload_gcc
+EXECUTABLE      := lud_omp_offload_clang
 
 # ------------  list of all source files  --------------------------------------
-SOURCES         := lud.c lud_omp_offload_gcc.c ../common/common.c 
+SOURCES         := lud.c lud_omp_offload_clang.c ../common/common.c 
 
 # ------------  compiler  ------------------------------------------------------
-CC              := gcc
-CXX             := g++
+CC              := clang
+CXX             := clang++
 
 # ------------  compiler flags  ------------------------------------------------  -qopt-gather-scatter-unroll=7
 DEBUG_CFLAGS    := -Wall -O0 -g
 #RELEASE_CFLAGS  := -Wall -O3 -g -fp-model fast=2 -fma -offload-option,mic,compiler,"-no-opt-prefetch"
 RELEASE_CFLAGS  := -Wall -O3 -g 
-COMMON_CFLAGS   := -fopenmp -foffload=nvptx-none -DOMP_OFFLOAD 
+COMMON_CFLAGS   := -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda  -Xopenmp-target -march=sm_70 -DOMP_OFFLOAD 
 
 # ------------  compiler defs  ------------------------------------------------
 DEBUG_CDEFS    := -DOMP_OFFLOAD 
@@ -32,7 +32,7 @@ COMMON_CDEFS   :=
 # ------------  linker flags  --------------------------------------------------
 DEBUG_LDFLAGS    := -g
 RELEASE_LDFLAGS  := 
-COMMON_LDFLAGS   := -fopenmp -foffload=nvptx-none -DOMP_OFFLOAD 
+COMMON_LDFLAGS   := -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda  -Xopenmp-target -march=sm_70 -DOMP_OFFLOAD
 
 ifeq (YES, ${DEBUG})
   CFLAGS       := ${DEBUG_CFLAGS} ${DEBUG_CDEFS}

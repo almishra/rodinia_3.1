@@ -1,1 +1,3 @@
 ./nn filelist_4 5 30 90
+./nn_offload_gcc filelist_4 5 30 90
+./nn_offload_clang filelist_4 5 30 90

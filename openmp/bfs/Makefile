@@ -1,19 +1,20 @@
 # C compiler
-CC = clang++
-ICC = clang++
-CC_FLAGS = -g -fopenmp -O2
-GPU_FLAGS = -fopenmp-targets=nvptx64-nvidia-cuda  -Xopenmp-target -march=sm_70 --cuda-path=${CUDA_TOOLKIT_ROOT_DIR}
+CC = g++
+ICC = icc
+CC_FLAGS = -g -fopenmp -foffload=nvptx-none
+CLANG = clang++
+CLANG_FLAGS = -g -fopenmp -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target -march=sm_70
 
-all: bfs bfs_offload bfs_offload_noreuse
+all: bfs bfs_offload_gcc bfs_offload_clang
 
 bfs: bfs.cpp 
 	$(CC) $(CC_FLAGS) bfs.cpp -o bfs 
 
-bfs_offload: bfs.cpp
-	$(ICC) $(CC_FLAGS) $(GPU_FLAGS) -DOMP_OFFLOAD bfs.cpp -o bfs_offload
+bfs_offload_gcc: bfs.cpp
+	$(CC) $(CC_FLAGS) -DOMP_OFFLOAD bfs.cpp -o bfs_offload_gcc
 
-bfs_offload_noreuse: bfs.cpp
-	$(ICC) $(CC_FLAGS) $(GPU_FLAGS) -DOMP_OFFLOAD -DOMP_OFFLOAD_NOREUSE bfs.cpp -o bfs_offload_noreuse
+bfs_offload_clang: bfs.cpp
+	$(CLANG) $(CLANG_FLAGS) -DOMP_OFFLOAD bfs.cpp -o bfs_offload_clang
 
 clean:
-	rm -f bfs bfs_offload result.txt
+	rm -f bfs bfs_offload_gcc bfs_offload_clang result.txt

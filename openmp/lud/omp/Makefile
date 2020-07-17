@@ -15,13 +15,13 @@ EXECUTABLE      := lud_omp
 SOURCES         := lud.c lud_omp.c ../common/common.c 
 
 # ------------  compiler  ------------------------------------------------------
-CC              := clang
-CXX             := clang++
+CC              := gcc
+CXX             := g++
 
 # ------------  compiler flags  ------------------------------------------------
-DEBUG_CFLAGS    := -Wall -O0 -g -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target -march=sm_70
-RELEASE_CFLAGS  := -Wall -O3 -fopenmp-targets=nvptx64-nvidia-cuda -Xopenmp-target -march=sm_70
-COMMON_CFLAGS   := -fopenmp 
+DEBUG_CFLAGS    := -Wall -O0 -g
+RELEASE_CFLAGS  := -Wall -O3 
+COMMON_CFLAGS   := -fopenmp
 
 # ------------  compiler defs  ------------------------------------------------
 DEBUG_CDEFS    := 

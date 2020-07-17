@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-//#include <math.h>
+#include <math.h>
 #include <sys/time.h>
 #include <omp.h>
 #define OPENMP
@@ -28,19 +28,19 @@ long long get_time()
 #pragma omp declare target
 #endif
 int maximum( int a,
-        int b,
-        int c){
+		 int b,
+		 int c){
 
-    int k;
-    if( a <= b )
-        k = b;
-    else 
-        k = a;
+	int k;
+	if( a <= b )
+		k = b;
+	else 
+	k = a;
 
-    if( k <=c )
-        return(c);
-    else
-        return(k);
+	if( k <=c )
+	return(c);
+	else
+	return(k);
 }
 #ifdef OMP_OFFLOAD
 #pragma omp end declare target
@@ -48,42 +48,42 @@ int maximum( int a,
 
 
 int blosum62[24][24] = {
-    { 4, -1, -2, -2,  0, -1, -1,  0, -2, -1, -1, -1, -1, -2, -1,  1,  0, -3, -2,  0, -2, -1,  0, -4},
-    {-1,  5,  0, -2, -3,  1,  0, -2,  0, -3, -2,  2, -1, -3, -2, -1, -1, -3, -2, -3, -1,  0, -1, -4},
-    {-2,  0,  6,  1, -3,  0,  0,  0,  1, -3, -3,  0, -2, -3, -2,  1,  0, -4, -2, -3,  3,  0, -1, -4},
-    {-2, -2,  1,  6, -3,  0,  2, -1, -1, -3, -4, -1, -3, -3, -1,  0, -1, -4, -3, -3,  4,  1, -1, -4},
-    { 0, -3, -3, -3,  9, -3, -4, -3, -3, -1, -1, -3, -1, -2, -3, -1, -1, -2, -2, -1, -3, -3, -2, -4},
-    {-1,  1,  0,  0, -3,  5,  2, -2,  0, -3, -2,  1,  0, -3, -1,  0, -1, -2, -1, -2,  0,  3, -1, -4},
-    {-1,  0,  0,  2, -4,  2,  5, -2,  0, -3, -3,  1, -2, -3, -1,  0, -1, -3, -2, -2,  1,  4, -1, -4},
-    { 0, -2,  0, -1, -3, -2, -2,  6, -2, -4, -4, -2, -3, -3, -2,  0, -2, -2, -3, -3, -1, -2, -1, -4},
-    {-2,  0,  1, -1, -3,  0,  0, -2,  8, -3, -3, -1, -2, -1, -2, -1, -2, -2,  2, -3,  0,  0, -1, -4},
-    {-1, -3, -3, -3, -1, -3, -3, -4, -3,  4,  2, -3,  1,  0, -3, -2, -1, -3, -1,  3, -3, -3, -1, -4},
-    {-1, -2, -3, -4, -1, -2, -3, -4, -3,  2,  4, -2,  2,  0, -3, -2, -1, -2, -1,  1, -4, -3, -1, -4},
-    {-1,  2,  0, -1, -3,  1,  1, -2, -1, -3, -2,  5, -1, -3, -1,  0, -1, -3, -2, -2,  0,  1, -1, -4},
-    {-1, -1, -2, -3, -1,  0, -2, -3, -2,  1,  2, -1,  5,  0, -2, -1, -1, -1, -1,  1, -3, -1, -1, -4},
-    {-2, -3, -3, -3, -2, -3, -3, -3, -1,  0,  0, -3,  0,  6, -4, -2, -2,  1,  3, -1, -3, -3, -1, -4},
-    {-1, -2, -2, -1, -3, -1, -1, -2, -2, -3, -3, -1, -2, -4,  7, -1, -1, -4, -3, -2, -2, -1, -2, -4},
-    { 1, -1,  1,  0, -1,  0,  0,  0, -1, -2, -2,  0, -1, -2, -1,  4,  1, -3, -2, -2,  0,  0,  0, -4},
-    { 0, -1,  0, -1, -1, -1, -1, -2, -2, -1, -1, -1, -1, -2, -1,  1,  5, -2, -2,  0, -1, -1,  0, -4},
-    {-3, -3, -4, -4, -2, -2, -3, -2, -2, -3, -2, -3, -1,  1, -4, -3, -2, 11,  2, -3, -4, -3, -2, -4},
-    {-2, -2, -2, -3, -2, -1, -2, -3,  2, -1, -1, -2, -1,  3, -3, -2, -2,  2,  7, -1, -3, -2, -1, -4},
-    { 0, -3, -3, -3, -1, -2, -2, -3, -3,  3,  1, -2,  1, -1, -2, -2,  0, -3, -1,  4, -3, -2, -1, -4},
-    {-2, -1,  3,  4, -3,  0,  1, -1,  0, -3, -4,  0, -3, -3, -2,  0, -1, -4, -3, -3,  4,  1, -1, -4},
-    {-1,  0,  0,  1, -3,  3,  4, -2,  0, -3, -3,  1, -1, -3, -1,  0, -1, -3, -2, -2,  1,  4, -1, -4},
-    { 0, -1, -1, -1, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2,  0,  0, -2, -1, -1, -1, -1, -1, -4},
-    {-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4,  1}
+{ 4, -1, -2, -2,  0, -1, -1,  0, -2, -1, -1, -1, -1, -2, -1,  1,  0, -3, -2,  0, -2, -1,  0, -4},
+{-1,  5,  0, -2, -3,  1,  0, -2,  0, -3, -2,  2, -1, -3, -2, -1, -1, -3, -2, -3, -1,  0, -1, -4},
+{-2,  0,  6,  1, -3,  0,  0,  0,  1, -3, -3,  0, -2, -3, -2,  1,  0, -4, -2, -3,  3,  0, -1, -4},
+{-2, -2,  1,  6, -3,  0,  2, -1, -1, -3, -4, -1, -3, -3, -1,  0, -1, -4, -3, -3,  4,  1, -1, -4},
+{ 0, -3, -3, -3,  9, -3, -4, -3, -3, -1, -1, -3, -1, -2, -3, -1, -1, -2, -2, -1, -3, -3, -2, -4},
+{-1,  1,  0,  0, -3,  5,  2, -2,  0, -3, -2,  1,  0, -3, -1,  0, -1, -2, -1, -2,  0,  3, -1, -4},
+{-1,  0,  0,  2, -4,  2,  5, -2,  0, -3, -3,  1, -2, -3, -1,  0, -1, -3, -2, -2,  1,  4, -1, -4},
+{ 0, -2,  0, -1, -3, -2, -2,  6, -2, -4, -4, -2, -3, -3, -2,  0, -2, -2, -3, -3, -1, -2, -1, -4},
+{-2,  0,  1, -1, -3,  0,  0, -2,  8, -3, -3, -1, -2, -1, -2, -1, -2, -2,  2, -3,  0,  0, -1, -4},
+{-1, -3, -3, -3, -1, -3, -3, -4, -3,  4,  2, -3,  1,  0, -3, -2, -1, -3, -1,  3, -3, -3, -1, -4},
+{-1, -2, -3, -4, -1, -2, -3, -4, -3,  2,  4, -2,  2,  0, -3, -2, -1, -2, -1,  1, -4, -3, -1, -4},
+{-1,  2,  0, -1, -3,  1,  1, -2, -1, -3, -2,  5, -1, -3, -1,  0, -1, -3, -2, -2,  0,  1, -1, -4},
+{-1, -1, -2, -3, -1,  0, -2, -3, -2,  1,  2, -1,  5,  0, -2, -1, -1, -1, -1,  1, -3, -1, -1, -4},
+{-2, -3, -3, -3, -2, -3, -3, -3, -1,  0,  0, -3,  0,  6, -4, -2, -2,  1,  3, -1, -3, -3, -1, -4},
+{-1, -2, -2, -1, -3, -1, -1, -2, -2, -3, -3, -1, -2, -4,  7, -1, -1, -4, -3, -2, -2, -1, -2, -4},
+{ 1, -1,  1,  0, -1,  0,  0,  0, -1, -2, -2,  0, -1, -2, -1,  4,  1, -3, -2, -2,  0,  0,  0, -4},
+{ 0, -1,  0, -1, -1, -1, -1, -2, -2, -1, -1, -1, -1, -2, -1,  1,  5, -2, -2,  0, -1, -1,  0, -4},
+{-3, -3, -4, -4, -2, -2, -3, -2, -2, -3, -2, -3, -1,  1, -4, -3, -2, 11,  2, -3, -4, -3, -2, -4},
+{-2, -2, -2, -3, -2, -1, -2, -3,  2, -1, -1, -2, -1,  3, -3, -2, -2,  2,  7, -1, -3, -2, -1, -4},
+{ 0, -3, -3, -3, -1, -2, -2, -3, -3,  3,  1, -2,  1, -1, -2, -2,  0, -3, -1,  4, -3, -2, -1, -4},
+{-2, -1,  3,  4, -3,  0,  1, -1,  0, -3, -4,  0, -3, -3, -2,  0, -1, -4, -3, -3,  4,  1, -1, -4},
+{-1,  0,  0,  1, -3,  3,  4, -2,  0, -3, -3,  1, -1, -3, -1,  0, -1, -3, -2, -2,  1,  4, -1, -4},
+{ 0, -1, -1, -1, -2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2,  0,  0, -2, -1, -1, -1, -1, -1, -4},
+{-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4,  1}
 };
 
 double gettime() {
-    struct timeval t;
-    gettimeofday(&t,NULL);
-    return t.tv_sec+t.tv_usec*1e-6;
+  struct timeval t;
+  gettimeofday(&t,NULL);
+  return t.tv_sec+t.tv_usec*1e-6;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Program main
 ////////////////////////////////////////////////////////////////////////////////
-    int
+int
 main( int argc, char** argv) 
 {
     runTest( argc, argv);
@@ -93,11 +93,11 @@ main( int argc, char** argv)
 
 void usage(int argc, char **argv)
 {
-    fprintf(stderr, "Usage: %s <max_rows/max_cols> <penalty> <num_threads>\n", argv[0]);
-    fprintf(stderr, "\t<dimension>      - x and y dimensions\n");
-    fprintf(stderr, "\t<penalty>        - penalty(positive integer)\n");
-    fprintf(stderr, "\t<num_threads>    - no. of threads\n");
-    exit(1);
+	fprintf(stderr, "Usage: %s <max_rows/max_cols> <penalty> <num_threads>\n", argv[0]);
+	fprintf(stderr, "\t<dimension>      - x and y dimensions\n");
+	fprintf(stderr, "\t<penalty>        - penalty(positive integer)\n");
+	fprintf(stderr, "\t<num_threads>    - no. of threads\n");
+	exit(1);
 }
 
 void nw_optimized(int *input_itemsets, int *output_itemsets, int *referrence,
@@ -105,144 +105,136 @@ void nw_optimized(int *input_itemsets, int *output_itemsets, int *referrence,
 {
 #ifdef OMP_OFFLOAD
     int transfer_size = max_rows * max_cols;
-#ifndef OMP_OFFLOAD_NOREUSE
-#pragma omp target data map(tofrom: max_cols, penalty, referrence[0:transfer_size]) map(input_itemsets[0:transfer_size])
-#endif
+    #pragma omp target data map(to: max_cols, penalty, referrence[0:transfer_size]) map(input_itemsets[0:transfer_size])
     {
 
-#ifdef OMP_OFFLOAD_NOREUSE
-#pragma omp target data map(tofrom: max_cols, penalty, referrence[0:transfer_size]) map(input_itemsets[0:transfer_size])
+    #pragma omp target 
 #endif
-#pragma omp target 
-#endif
-        for( int blk = 1; blk <= (max_cols-1)/BLOCK_SIZE; blk++ )
-        {
+    for( int blk = 1; blk <= (max_cols-1)/BLOCK_SIZE; blk++ )
+    {
 #ifdef OPENMP
 #pragma omp parallel for schedule(static) shared(input_itemsets, referrence) firstprivate(blk, max_rows, max_cols, penalty)
 #endif
-            for( int b_index_x = 0; b_index_x < blk; ++b_index_x)
+        for( int b_index_x = 0; b_index_x < blk; ++b_index_x)
+        {
+            int b_index_y = blk - 1 - b_index_x;
+            int input_itemsets_l[(BLOCK_SIZE + 1) *(BLOCK_SIZE+1)] __attribute__ ((aligned (64)));
+            int reference_l[BLOCK_SIZE * BLOCK_SIZE] __attribute__ ((aligned (64)));
+
+            // Copy referrence to local memory
+            for ( int i = 0; i < BLOCK_SIZE; ++i )
             {
-                int b_index_y = blk - 1 - b_index_x;
-                int input_itemsets_l[(BLOCK_SIZE + 1) *(BLOCK_SIZE+1)] __attribute__ ((aligned (64)));
-                int reference_l[BLOCK_SIZE * BLOCK_SIZE] __attribute__ ((aligned (64)));
-
-                // Copy referrence to local memory
-                for ( int i = 0; i < BLOCK_SIZE; ++i )
-                {
 #pragma omp simd
-                    for ( int j = 0; j < BLOCK_SIZE; ++j)
-                    {
-                        reference_l[i*BLOCK_SIZE + j] = referrence[max_cols*(b_index_y*BLOCK_SIZE + i + 1) + b_index_x*BLOCK_SIZE +  j + 1];
-                    }
-                }
-
-                // Copy input_itemsets to local memory
-                for ( int i = 0; i < BLOCK_SIZE + 1; ++i )
+                for ( int j = 0; j < BLOCK_SIZE; ++j)
                 {
-#pragma omp simd
-                    for ( int j = 0; j < BLOCK_SIZE + 1; ++j)
-                    {
-                        input_itemsets_l[i*(BLOCK_SIZE + 1) + j] = input_itemsets[max_cols*(b_index_y*BLOCK_SIZE + i) + b_index_x*BLOCK_SIZE +  j];
-                    }
+                    reference_l[i*BLOCK_SIZE + j] = referrence[max_cols*(b_index_y*BLOCK_SIZE + i + 1) + b_index_x*BLOCK_SIZE +  j + 1];
                 }
-
-                // Compute
-                for ( int i = 1; i < BLOCK_SIZE + 1; ++i )
-                {
-                    for ( int j = 1; j < BLOCK_SIZE + 1; ++j)
-                    {
-                        input_itemsets_l[i*(BLOCK_SIZE + 1) + j] = maximum( input_itemsets_l[(i - 1)*(BLOCK_SIZE + 1) + j - 1] + reference_l[(i - 1)*BLOCK_SIZE + j - 1],
-                                input_itemsets_l[i*(BLOCK_SIZE + 1) + j - 1] - penalty,
-                                input_itemsets_l[(i - 1)*(BLOCK_SIZE + 1) + j] - penalty);
-                    }
-                }
-
-                // Copy results to global memory
-                for ( int i = 0; i < BLOCK_SIZE; ++i )
-                {
-#pragma omp simd
-                    for ( int j = 0; j < BLOCK_SIZE; ++j)
-                    {
-                        input_itemsets[max_cols*(b_index_y*BLOCK_SIZE + i + 1) + b_index_x*BLOCK_SIZE +  j + 1] = input_itemsets_l[(i + 1)*(BLOCK_SIZE+1) + j + 1];
-                    }
-                }
-
             }
-        }    
 
-        printf("Processing bottom-right matrix\n");
+            // Copy input_itemsets to local memory
+            for ( int i = 0; i < BLOCK_SIZE + 1; ++i )
+            {
+#pragma omp simd
+                for ( int j = 0; j < BLOCK_SIZE + 1; ++j)
+                {
+                    input_itemsets_l[i*(BLOCK_SIZE + 1) + j] = input_itemsets[max_cols*(b_index_y*BLOCK_SIZE + i) + b_index_x*BLOCK_SIZE +  j];
+                }
+            }
+
+            // Compute
+            for ( int i = 1; i < BLOCK_SIZE + 1; ++i )
+            {
+                for ( int j = 1; j < BLOCK_SIZE + 1; ++j)
+                {
+                    input_itemsets_l[i*(BLOCK_SIZE + 1) + j] = maximum( input_itemsets_l[(i - 1)*(BLOCK_SIZE + 1) + j - 1] + reference_l[(i - 1)*BLOCK_SIZE + j - 1],
+                            input_itemsets_l[i*(BLOCK_SIZE + 1) + j - 1] - penalty,
+                            input_itemsets_l[(i - 1)*(BLOCK_SIZE + 1) + j] - penalty);
+                }
+            }
+
+            // Copy results to global memory
+            for ( int i = 0; i < BLOCK_SIZE; ++i )
+            {
+#pragma omp simd
+                for ( int j = 0; j < BLOCK_SIZE; ++j)
+                {
+                    input_itemsets[max_cols*(b_index_y*BLOCK_SIZE + i + 1) + b_index_x*BLOCK_SIZE +  j + 1] = input_itemsets_l[(i + 1)*(BLOCK_SIZE+1) + j + 1];
+                }
+            }
+            
+        }
+    }    
+        
+    printf("Processing bottom-right matrix\n");
 
 #ifdef OMP_OFFLOAD
-#ifdef OMP_OFFLOAD_NOREUSE
-#pragma omp target data map(tofrom: max_cols, penalty, referrence[0:transfer_size]) map(input_itemsets[0:transfer_size])
+    #pragma omp target
 #endif
-#pragma omp target
-#endif
-        for ( int blk = 2; blk <= (max_cols-1)/BLOCK_SIZE; blk++ )
-        {
+    for ( int blk = 2; blk <= (max_cols-1)/BLOCK_SIZE; blk++ )
+    {
 #ifdef OPENMP
 #pragma omp parallel for schedule(static) shared(input_itemsets, referrence) firstprivate(blk, max_rows, max_cols, penalty)
 #endif
-            for( int b_index_x = blk - 1; b_index_x < (max_cols-1)/BLOCK_SIZE; ++b_index_x)
+        for( int b_index_x = blk - 1; b_index_x < (max_cols-1)/BLOCK_SIZE; ++b_index_x)
+        {
+            int b_index_y = (max_cols-1)/BLOCK_SIZE + blk - 2 - b_index_x;
+
+            int input_itemsets_l[(BLOCK_SIZE + 1) *(BLOCK_SIZE+1)] __attribute__ ((aligned (64)));
+            int reference_l[BLOCK_SIZE * BLOCK_SIZE] __attribute__ ((aligned (64)));
+ 
+            // Copy referrence to local memory
+            for ( int i = 0; i < BLOCK_SIZE; ++i )
             {
-                int b_index_y = (max_cols-1)/BLOCK_SIZE + blk - 2 - b_index_x;
-
-                int input_itemsets_l[(BLOCK_SIZE + 1) *(BLOCK_SIZE+1)] __attribute__ ((aligned (64)));
-                int reference_l[BLOCK_SIZE * BLOCK_SIZE] __attribute__ ((aligned (64)));
-
-                // Copy referrence to local memory
-                for ( int i = 0; i < BLOCK_SIZE; ++i )
-                {
 #pragma omp simd
-                    for ( int j = 0; j < BLOCK_SIZE; ++j)
-                    {
-                        reference_l[i*BLOCK_SIZE + j] = referrence[max_cols*(b_index_y*BLOCK_SIZE + i + 1) + b_index_x*BLOCK_SIZE +  j + 1];
-                    }
-                }
-
-                // Copy input_itemsets to local memory
-                for ( int i = 0; i < BLOCK_SIZE + 1; ++i )
+                for ( int j = 0; j < BLOCK_SIZE; ++j)
                 {
+                    reference_l[i*BLOCK_SIZE + j] = referrence[max_cols*(b_index_y*BLOCK_SIZE + i + 1) + b_index_x*BLOCK_SIZE +  j + 1];
+                }
+            }
+
+            // Copy input_itemsets to local memory
+            for ( int i = 0; i < BLOCK_SIZE + 1; ++i )
+            {
 #pragma omp simd
-                    for ( int j = 0; j < BLOCK_SIZE + 1; ++j)
-                    {
-                        input_itemsets_l[i*(BLOCK_SIZE + 1) + j] = input_itemsets[max_cols*(b_index_y*BLOCK_SIZE + i) + b_index_x*BLOCK_SIZE +  j];
-                    }
-                }
-
-                // Compute
-                for ( int i = 1; i < BLOCK_SIZE + 1; ++i )
+                for ( int j = 0; j < BLOCK_SIZE + 1; ++j)
                 {
-                    for ( int j = 1; j < BLOCK_SIZE + 1; ++j)
-                    {
-                        input_itemsets_l[i*(BLOCK_SIZE + 1) + j] = maximum( input_itemsets_l[(i - 1)*(BLOCK_SIZE + 1) + j - 1] + reference_l[(i - 1)*BLOCK_SIZE + j - 1],
-                                input_itemsets_l[i*(BLOCK_SIZE + 1) + j - 1] - penalty,
-                                input_itemsets_l[(i - 1)*(BLOCK_SIZE + 1) + j] - penalty);
-                    }
+                    input_itemsets_l[i*(BLOCK_SIZE + 1) + j] = input_itemsets[max_cols*(b_index_y*BLOCK_SIZE + i) + b_index_x*BLOCK_SIZE +  j];
                 }
+            }
 
-                // Copy results to global memory
-                for ( int i = 0; i < BLOCK_SIZE; ++i )
+            // Compute
+            for ( int i = 1; i < BLOCK_SIZE + 1; ++i )
+            {
+                for ( int j = 1; j < BLOCK_SIZE + 1; ++j)
                 {
+                    input_itemsets_l[i*(BLOCK_SIZE + 1) + j] = maximum( input_itemsets_l[(i - 1)*(BLOCK_SIZE + 1) + j - 1] + reference_l[(i - 1)*BLOCK_SIZE + j - 1],
+                            input_itemsets_l[i*(BLOCK_SIZE + 1) + j - 1] - penalty,
+                            input_itemsets_l[(i - 1)*(BLOCK_SIZE + 1) + j] - penalty);
+                }
+            }
+
+            // Copy results to global memory
+            for ( int i = 0; i < BLOCK_SIZE; ++i )
+            {
 #pragma omp simd
-                    for ( int j = 0; j < BLOCK_SIZE; ++j)
-                    {
-                        input_itemsets[max_cols*(b_index_y*BLOCK_SIZE + i + 1) + b_index_x*BLOCK_SIZE +  j + 1] = input_itemsets_l[(i + 1)*(BLOCK_SIZE+1) + j +1];
-                    }
+                for ( int j = 0; j < BLOCK_SIZE; ++j)
+                {
+                    input_itemsets[max_cols*(b_index_y*BLOCK_SIZE + i + 1) + b_index_x*BLOCK_SIZE +  j + 1] = input_itemsets_l[(i + 1)*(BLOCK_SIZE+1) + j +1];
                 }
             }
         }
+    }
 
 #ifdef OMP_OFFLOAD
     }
 #endif
-
+   
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //! Run a simple test for CUDA
 ////////////////////////////////////////////////////////////////////////////////
-    void
+void
 runTest( int argc, char** argv) 
 {
     int max_rows, max_cols, penalty;
@@ -309,11 +301,11 @@ runTest( int argc, char** argv)
     //Compute top-left matrix 
     printf("Num of threads: %d\n", omp_num_threads);
     printf("Processing top-left matrix\n");
-
+   
     long long start_time = get_time();
 
     nw_optimized( input_itemsets, output_itemsets, referrence,
-            max_rows, max_cols, penalty );
+        max_rows, max_cols, penalty );
 
     long long end_time = get_time();
 
@@ -325,7 +317,7 @@ runTest( int argc, char** argv)
     FILE *fpo = fopen("result.txt","w");
     fprintf(fpo, "print traceback value GPU:\n");
 
-    for (int i = max_rows - 2,  j = max_rows - 2; i>=0, j>=0;) {
+    for (int i = max_rows - 2,  j = max_rows - 2; i>=0, j>=0;){
         int nw, n, w, traceback;
         if ( i == max_rows - 2 && j == max_rows - 2 )
             fprintf(fpo, "%d ", input_itemsets[ i * max_cols + j]); //print the first element
@@ -385,3 +377,6 @@ runTest( int argc, char** argv)
     free(output_itemsets);
 
 }
+
+
+

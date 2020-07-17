@@ -5,17 +5,22 @@ extern int omp_num_threads;
 
 #define BS 16
 
-#define AA(_i,_j) b[offset*size+_i*size+_j+offset]
-#define BB(_i,_j) b[_i*size+_j]
+#define AA(_i,_j) a[offset*size+_i*size+_j+offset]
+#define BB(_i,_j) a[_i*size+_j]
 
-#ifdef OMP_OFFLOAD
-//#pragma offload_attribute(push, target(mic))
-#pragma omp declare target
-#endif
-/*
+double total = 0;
 void lud_diagonal_omp (float* a, int size, int offset)
 {
     int i, j, k;
+#ifdef OMP_OFFLOAD
+#ifdef OMP_OFFLOAD_NOREUSE
+total+=sizeof(float)*size*size;
+#pragma omp target data map(size, a[0:size*size])
+#endif
+#pragma omp target teams distribute parallel for 
+#else
+#pragma omp parallel for 
+#endif
     for (i = 0; i < BS; i++) {
 
         for (j = i; j < BS; j++) {
@@ -33,75 +38,57 @@ void lud_diagonal_omp (float* a, int size, int offset)
         }
     }
 
-}*/
-
-#ifdef OMP_OFFLOAD
-//#pragma offload_attribute(pop)
-#pragma omp end declare target
-#endif
+}
 
 
 // implements block LU factorization 
 void lud_omp(float *a, int size)
 {
     int offset, chunk_idx, size_inter, chunks_in_inter_row, chunks_per_inter;
-    float b[size*size];
-    for(int i=9; i<size*size; i++) b[i] = a[i];
 
 #ifdef OMP_OFFLOAD
-#pragma omp target map(to: size) map(b[0:size*size])
+#ifndef OMP_OFFLOAD_NOREUSE
+total+=sizeof(float)*size*size;
+#pragma omp target data map(to: size) map(a[0:size*size])
 #endif
-
-#ifdef OMP_OFFLOAD
+#endif
 {
-    omp_set_num_threads(224);
+/*    omp_set_num_threads(224);
 #else
     printf("running OMP on host\n");
-    omp_set_num_threads(omp_num_threads);
-#endif
+    omp_set_num_threads(omp_num_threads);*/
     for (offset = 0; offset < size - BS ; offset += BS)
     {
         // lu factorization of left-top corner block diagonal matrix 
         //
-//        lud_diagonal_omp(a, size, offset);
+        lud_diagonal_omp(a, size, offset);
             
-{
-    int i, j, k;
-    for (i = 0; i < BS; i++) {
-
-        for (j = i; j < BS; j++) {
-            for (k = 0; k < i ; k++) {
-                AA(i,j) = AA(i,j) - AA(i,k) * AA(k,j);
-            }
-        }
-   
-        float temp = 1.f/AA(i,i);
-        for (j = i+1; j < BS; j++) {
-            for (k = 0; k < i ; k++) {
-                AA(j,i) = AA(j,i) - AA(j,k) * AA(k,i);
-            }
-            AA(j,i) = AA(j,i)*temp;
-        }
-    }
-
-} 
         size_inter = size - offset -  BS;
         chunks_in_inter_row  = size_inter/BS;
         
         // calculate perimeter block matrices
         // 
-        //#pragma omp parallel for default(none) \
-        //  private(chunk_idx) shared(size, chunks_per_inter, chunks_in_inter_row, offset, b) 
+        #ifdef OMP_OFFLOAD
+        #ifdef OMP_OFFLOAD_NOREUSE
+total+=sizeof(float)*size*size;
+        #pragma omp target data map(size, a[0:size*size])
+        #endif
+        #pragma omp target teams distribute parallel for default(none) \
+          private(chunk_idx) shared(size, chunks_per_inter, chunks_in_inter_row, offset, a) 
+        #else
+        #pragma omp parallel for default(none) \
+          private(chunk_idx) shared(size, chunks_per_inter, chunks_in_inter_row, offset, a) 
+        #endif
         for ( chunk_idx = 0; chunk_idx < chunks_in_inter_row; chunk_idx++)
         {
             int i, j, k, i_global, j_global, i_here, j_here;
             float sum;           
-            float temp[BS*BS];// __attribute__ ((aligned (64)));
+            float temp[BS*BS] __attribute__ ((aligned (64)));
 
             for (i = 0; i < BS; i++) {
-         //       #pragma omp simd
+                #pragma omp simd
                 for (j =0; j < BS; j++){
-                    temp[i*BS + j] = b[size*(i + offset) + offset + j ];
+                    temp[i*BS + j] = a[size*(i + offset) + offset + j ];
                 }
             }
             i_global = offset;
@@ -134,7 +121,7 @@ void lud_omp(float *a, int size)
                     }
                     i_here = i_global + i;
                     j_here = j_global + j;
-                    b[size*i_here + j_here] = ( b[size*i_here+j_here] - sum ) / b[size*(offset+j) + offset+j];
+                    a[size*i_here + j_here] = ( a[size*i_here+j_here] - sum ) / a[size*(offset+j) + offset+j];
                 }
             }
 
@@ -144,8 +131,17 @@ void lud_omp(float *a, int size)
         //
         chunks_per_inter = chunks_in_inter_row*chunks_in_inter_row;
 
-//#pragma omp parallel for schedule(auto) default(none) \
-  //       private(chunk_idx ) shared(size, chunks_per_inter, chunks_in_inter_row, offset, b) 
+        #ifdef OMP_OFFLOAD
+        #ifdef OMP_OFFLOAD_NOREUSE
+total+=sizeof(float)*size*size;
+        #pragma omp target data map(size, a[0:size*size])
+        #endif
+        #pragma omp target teams distribute parallel for schedule(auto) default(none) \
+                private(chunk_idx ) shared(size, chunks_per_inter, chunks_in_inter_row, offset, a) 
+        #else
+        #pragma omp parallel for schedule(auto) default(none) \
+                private(chunk_idx ) shared(size, chunks_per_inter, chunks_in_inter_row, offset, a) 
+        #endif
         for  (chunk_idx =0; chunk_idx < chunks_per_inter; chunk_idx++)
         {
             int i, j, k, i_global, j_global;
@@ -157,22 +153,22 @@ void lud_omp(float *a, int size)
             j_global = offset + BS * (1 + chunk_idx%chunks_in_inter_row);
 
             for (i = 0; i < BS; i++) {
-//#pragma omp simd
+#pragma omp simd
                 for (j =0; j < BS; j++){
-                    temp_top[i*BS + j]  = b[size*(i + offset) + j + j_global ];
-                    temp_left[i*BS + j] = b[size*(i + i_global) + offset + j];
+                    temp_top[i*BS + j]  = a[size*(i + offset) + j + j_global ];
+                    temp_left[i*BS + j] = a[size*(i + i_global) + offset + j];
                 }
             }
 
             for (i = 0; i < BS; i++)
             {
                 for (k=0; k < BS; k++) {
-//#pragma omp simd 
+#pragma omp simd 
                     for (j = 0; j < BS; j++) {
                         sum[j] += temp_left[BS*i + k] * temp_top[BS*k + j];
                     }
                 }
-//#pragma omp simd 
+#pragma omp simd 
                 for (j = 0; j < BS; j++) {
                     BB((i+i_global),(j+j_global)) -= sum[j];
                     sum[j] = 0.f;
@@ -181,29 +177,8 @@ void lud_omp(float *a, int size)
         }
     }
 
- //   lud_diagonal_omp(a, size, offset);
-{
-    int i, j, k;
-    for (i = 0; i < BS; i++) {
-
-        for (j = i; j < BS; j++) {
-            for (k = 0; k < i ; k++) {
-                AA(i,j) = AA(i,j) - AA(i,k) * AA(k,j);
-            }
-        }
-   
-        float temp = 1.f/AA(i,i);
-        for (j = i+1; j < BS; j++) {
-            for (k = 0; k < i ; k++) {
-                AA(j,i) = AA(j,i) - AA(j,k) * AA(k,i);
-            }
-            AA(j,i) = AA(j,i)*temp;
-        }
-    }
-
+    lud_diagonal_omp(a, size, offset);
 }
-#ifdef OMP_OFFLOAD
-}
-#endif
 
+    printf("Total size = %lf\n", total);
 }

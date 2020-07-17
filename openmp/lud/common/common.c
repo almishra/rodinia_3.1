@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-//#include <math.h>
+#include <math.h>
 
 #include "common.h"
 
@@ -88,13 +88,6 @@ create_matrix_from_random(float **mp, int size){
       return RET_FAILURE;
   }
 
-  m = (float*)malloc(size*size*sizeof(float));
-  if ( m == NULL) {
-      free(l);
-      free(u);
-      return RET_FAILURE;
-  }
-
   for (i = 0; i < size; i++) {
       for (j=0; j < size; j++) {
           if (i>j) {
@@ -117,6 +110,7 @@ create_matrix_from_random(float **mp, int size){
       }
   }
 
+  m = (float*)malloc(size*size*sizeof(float));
   for (i=0; i < size; i++) {
       for (j=0; j < size; j++) {
           for (k=0; k <= MIN(i,j); k++)
@@ -143,12 +137,11 @@ matrix_multiply(float *inputa, float *inputb, float *output, int size){
 
 }
 
-void
+func_ret_t
 lud_verify(float *m, float *lu, int matrix_dim){
   int i,j,k;
   float *tmp = (float*)malloc(matrix_dim*matrix_dim*sizeof(float));
 
-#pragma omp parallel for collapse(2)
   for (i=0; i < matrix_dim; i ++)
     for (j=0; j< matrix_dim; j++) {
         float sum = 0;
@@ -192,6 +185,8 @@ lud_verify(float *m, float *lu, int matrix_dim){
       }
   }
   free(tmp);
+
+  return RET_SUCCESS;
 }
 
 void
